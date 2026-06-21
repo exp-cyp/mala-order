@@ -88,16 +88,25 @@ export default function App() {
   const [customerName, setCustomerName] = useState("");
 
   useEffect(() => {
-    fetch(`${APPS_SCRIPT_URL}?action=getInitData`)
-      .then(r => r.json())
-      .then(data => {
-        setStock(data.stock || {});
-        setRounds(data.rounds || []);
-        setPickup(data.pickup || {});
-        setLoading(false);
-      })
-      .catch(() => { setLoading(false); setError("โหลดข้อมูลไม่ได้ กรุณาลองใหม่"); });
-  }, []);
+  const callbackName = "jsonpCallback_" + Date.now();
+  const script = document.createElement("script");
+
+  window[callbackName] = (data) => {
+    setStock(data.stock || {});
+    setRounds(data.rounds || []);
+    setPickup(data.pickup || {});
+    setLoading(false);
+    delete window[callbackName];
+    document.body.removeChild(script);
+  };
+
+  script.src = `${APPS_SCRIPT_URL}?action=getInitData&callback=${callbackName}`;
+  script.onerror = () => {
+    setError("โหลดข้อมูลไม่ได้");
+    setLoading(false);
+  };
+  document.body.appendChild(script);
+}, []);
 
   const currentSet = SETS[setKey];
   const addonTotal = useMemo(() => allAddons.reduce((sum, item) => sum + (addonQty[item.id] || 0) * item.price, 0), [addonQty]);
