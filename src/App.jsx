@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Flame, Plus, Minus, Gift, ChefHat, ShoppingCart, Trash2, MapPin, Clock, User, CheckCircle, Loader } from "lucide-react";
 
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw6ZGbF-m99cr4K2wU9jPR0YcMs1XUljUbtMYH0sWti/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxBpzHLDCAIIJYryXiN6c6F4VxbtkxLndxX3VKCJ6DDuf7bRYw42fLLe8vYE9X-RF_3Hw/exec";
 
 const SETS = {
   pork: {
