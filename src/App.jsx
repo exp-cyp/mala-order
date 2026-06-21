@@ -114,11 +114,12 @@ export default function App() {
   const cartTotal = useMemo(() => cart.reduce((sum, item) => sum + item.itemTotal, 0), [cart]);
 
   function getAvailable(id) {
-    const stockItem = stock[id];
-    if (!stockItem) return 0;
-    const inCart = cart.reduce((sum, ci) => sum + (ci.addons.find(a => a.id === id)?.qty || 0), 0);
-    return stockItem.bags_remaining - inCart;
-  }
+  const stockItem = stock[id];
+  console.log('stock[' + id + ']:', stockItem);
+  if (!stockItem) return 0;
+  const inCart = cart.reduce((sum, ci) => sum + (ci.addons.find(a => a.id === id)?.qty || 0), 0);
+  return stockItem.bags_remaining - inCart;
+}
 
   function changeQty(id, delta) {
     const available = getAvailable(id);
