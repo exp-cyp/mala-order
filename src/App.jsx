@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { Flame, Plus, Minus, Gift, ChefHat, ShoppingCart, Trash2, MapPin, Clock, User, CheckCircle, Loader } from "lucide-react";
-
+import { SpeedInsights } from "@vercel/speed-insights/next"
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxBpzHLDCAIIJYryXiN6c6F4VxbtkxLndxX3VKCJ6DDuf7bRYw42fLLe8vYE9X-RF_3Hw/exec";
 
 const SETS = {
