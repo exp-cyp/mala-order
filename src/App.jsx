@@ -86,26 +86,41 @@ export default function App() {
   const [deliveryType, setDeliveryType] = useState("pickup");
   const [selectedRound, setSelectedRound] = useState(null);
   const [customerName, setCustomerName] = useState("");
+  const [lineUserId, setLineUserId] = useState("test-user");
+  const [displayName, setDisplayName] = useState("");
 
   useEffect(() => {
-  const callbackName = "jsonpCallback_" + Date.now();
-  const script = document.createElement("script");
+  const initApp = async () => {
+    try {
+      await liff.init({ liffId: "2010455338-s9xBTgbN" });
+      if (!liff.isLoggedIn()) {
+        liff.login();
+        return;
+      }
+      const profile = await liff.getProfile();
+      setLineUserId(profile.userId);
+      setDisplayName(profile.displayName);
+    } catch (err) {
+      console.error("LIFF init error:", err);
+    }
 
-  window[callbackName] = (data) => {
-    setStock(data.stock || {});
-    setRounds(data.rounds || []);
-    setPickup(data.pickup || {});
-    setLoading(false);
-    delete window[callbackName];
-    document.body.removeChild(script);
+    // โหลด stock ต่อ (JSONP เหมือนเดิม)
+    const callbackName = "jsonpCallback_" + Date.now();
+    const script = document.createElement("script");
+    window[callbackName] = (data) => {
+      setStock(data.stock || {});
+      setRounds(data.rounds || []);
+      setPickup(data.pickup || {});
+      setLoading(false);
+      delete window[callbackName];
+      document.body.removeChild(script);
+    };
+    script.src = `${APPS_SCRIPT_URL}?action=getInitData&callback=${callbackName}`;
+    script.onerror = () => { setLoading(false); };
+    document.body.appendChild(script);
   };
 
-  script.src = `${APPS_SCRIPT_URL}?action=getInitData&callback=${callbackName}`;
-  script.onerror = () => {
-    setError("โหลดข้อมูลไม่ได้");
-    setLoading(false);
-  };
-  document.body.appendChild(script);
+  initApp();
 }, []);
 
   const currentSet = SETS[setKey];
@@ -150,8 +165,8 @@ export default function App() {
         method: "POST",
         body: JSON.stringify({
           action: "submitOrder",
-          lineUserId: "test-user",
-          displayName: customerName,
+          lineUserId: lineUserId,
+          displayName: displayName || customerName,
           items: cart.map(item => ({ set: item.setName, spice: item.spice, addons: item.addons, itemTotal: item.itemTotal })),
           delivery_type: deliveryType,
           round_id: selectedRound || null,
