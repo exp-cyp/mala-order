@@ -121,10 +121,11 @@ export default function App() {
   }
 
   function changeQty(id, delta) {
+    const available = getAvailable(id);
     setAddonQty(prev => {
       const cur = prev[id] || 0;
-      if (delta > 0 && cur >= getAvailable(id)) return prev;
-      const next = Math.max(0, Math.min(3, cur + delta));
+      if (delta > 0 && cur >= available) return prev;
+      const next = Math.max(0, Math.min(available, cur + delta));
       return { ...prev, [id]: next };
     });
   }
