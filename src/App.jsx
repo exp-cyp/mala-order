@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { ShoppingCart, ArrowLeft, Minus, Plus, Loader, MapPin, Clock } from "lucide-react";
+import { ShoppingCart, ArrowLeft, Minus, Plus, Loader, MapPin, Clock, ChevronLeft, ChevronRight, X } from "lucide-react";
 
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxBpzHLDCAIIJYryXiN6c6F4VxbtkxLndxX3VKCJ6DDuf7bRYw42fLLe8vYE9X-RF_3Hw/exec";
 const LIFF_ID = "2010455338-s9xBTgbN";
@@ -15,6 +15,8 @@ const SETS = [
   {
     id: "pork", name: "เซตหมู", price: 99,
     description: "สันคอหมูสไลซ์, สามชั้นสไลซ์, เห็ดรวม, ผักสด, เส้นมันเทศ",
+    emoji: "🥩",
+    images: [null, null, null],
     items: [
       { name: "สันคอหมูสไลซ์ + สามชั้น", grams: 120 },
       { name: "เห็ดรวม (หูหนู/เข็มทอง/ออริจิ)", grams: 80 },
@@ -26,6 +28,8 @@ const SETS = [
   {
     id: "seafood", name: "เซตทะเล", price: 129,
     description: "กุ้ง, หมึก, เห็ดรวม, ผักสด, เส้นมันเทศ",
+    emoji: "🦐",
+    images: [null, null, null],
     items: [
       { name: "กุ้ง + หมึก", grams: 120 },
       { name: "เห็ดรวม (หูหนู/เข็มทอง/ออริจิ)", grams: 80 },
@@ -33,6 +37,13 @@ const SETS = [
       { name: "ผักบุ้ง", grams: 50 },
       { name: "เส้นมันเทศเล็ก", grams: 100 },
     ],
+  },
+  {
+    id: "diy", name: "DIY เลือกเองได้เลย", price: 39,
+    description: "เลือกวัตถุดิบได้ตามใจ ราคาเริ่มต้น ฿39",
+    emoji: "🍳",
+    images: [null, null],
+    items: [],
   },
 ];
 
@@ -83,6 +94,103 @@ function LineIcon() {
   );
 }
 
+// ─── Image Gallery Component ────────────────────────────────────────────────
+function ImageGallery({ images, emoji, name }) {
+  const [current, setCurrent] = useState(0);
+  const [lightbox, setLightbox] = useState(false);
+  const [lbIndex, setLbIndex] = useState(0);
+
+  const total = images.length;
+
+  function openLightbox(i) { setLbIndex(i); setLightbox(true); }
+  function closeLightbox() { setLightbox(false); }
+  function prev(e) { e?.stopPropagation(); setLbIndex(i => (i - 1 + total) % total); }
+  function next(e) { e?.stopPropagation(); setLbIndex(i => (i + 1) % total); }
+
+  return (
+    <>
+      {/* Scrollable thumbnail strip */}
+      <div style={{ position: "relative", height: 240, background: "linear-gradient(135deg, #8B3A1A, #5C1208)", overflow: "hidden" }}>
+        {/* Main display */}
+        <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
+          onClick={() => openLightbox(current)}>
+          {images[current] ? (
+            <img src={images[current]} alt={name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: 64, opacity: 0.5 }}>{emoji}</span>
+              <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)" }}>Tap เพื่อดูรูป</span>
+            </div>
+          )}
+          {/* Gradient overlay */}
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 50%)" }} />
+        </div>
+
+        {/* Dots + arrows */}
+        {total > 1 && (
+          <>
+            <button onClick={e => { e.stopPropagation(); setCurrent(i => (i - 1 + total) % total); }}
+              style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", width: 32, height: 32, borderRadius: "50%", background: "rgba(0,0,0,0.35)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+              <ChevronLeft size={18} color="#fff" />
+            </button>
+            <button onClick={e => { e.stopPropagation(); setCurrent(i => (i + 1) % total); }}
+              style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", width: 32, height: 32, borderRadius: "50%", background: "rgba(0,0,0,0.35)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+              <ChevronRight size={18} color="#fff" />
+            </button>
+            <div style={{ position: "absolute", bottom: 12, left: "50%", transform: "translateX(-50%)", display: "flex", gap: 5 }}>
+              {images.map((_, i) => (
+                <button key={i} onClick={e => { e.stopPropagation(); setCurrent(i); }}
+                  style={{ width: i === current ? 18 : 6, height: 6, borderRadius: 3, background: i === current ? "#fff" : "rgba(255,255,255,0.45)", border: "none", padding: 0, cursor: "pointer", transition: "width 0.2s" }} />
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Lightbox */}
+      {lightbox && (
+        <div onClick={closeLightbox}
+          style={{ position: "fixed", inset: 0, zIndex: 100, background: "rgba(0,0,0,0.9)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <button onClick={closeLightbox}
+            style={{ position: "absolute", top: 20, right: 20, width: 36, height: 36, borderRadius: "50%", background: "rgba(255,255,255,0.15)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+            <X size={18} color="#fff" />
+          </button>
+
+          {total > 1 && (
+            <button onClick={prev}
+              style={{ position: "absolute", left: 16, width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.15)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+              <ChevronLeft size={24} color="#fff" />
+            </button>
+          )}
+
+          <div onClick={e => e.stopPropagation()}
+            style={{ width: "85%", maxWidth: 420, aspectRatio: "1", borderRadius: 20, overflow: "hidden", background: "#333", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            {images[lbIndex] ? (
+              <img src={images[lbIndex]} alt={name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            ) : (
+              <span style={{ fontSize: 80 }}>{emoji}</span>
+            )}
+          </div>
+
+          {total > 1 && (
+            <button onClick={next}
+              style={{ position: "absolute", right: 16, width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.15)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+              <ChevronRight size={24} color="#fff" />
+            </button>
+          )}
+
+          <div style={{ position: "absolute", bottom: 30, left: "50%", transform: "translateX(-50%)", display: "flex", gap: 6 }}>
+            {images.map((_, i) => (
+              <div key={i} style={{ width: i === lbIndex ? 20 : 7, height: 7, borderRadius: 4, background: i === lbIndex ? "#fff" : "rgba(255,255,255,0.4)", transition: "width 0.2s" }} />
+            ))}
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+// ─── Main App ────────────────────────────────────────────────────────────────
 export default function App() {
   const [page, setPage] = useState("home");
   const [selectedSet, setSelectedSet] = useState(null);
@@ -207,10 +315,10 @@ export default function App() {
     setCustName(""); setPhone(""); setDeliveryType(""); setSelectedRound(null);
   }
 
-  const S = { page: { display: "flex", flexDirection: "column", height: "100vh", background: C.bg, fontFamily: "'Sarabun', sans-serif", maxWidth: 520, margin: "0 auto" } };
+  const pageStyle = { display: "flex", flexDirection: "column", height: "100vh", background: C.bg, maxWidth: 520, margin: "0 auto", fontFamily: "'Sarabun', sans-serif" };
 
   if (loading) return (
-    <div style={{ ...S.page, alignItems: "center", justifyContent: "center", gap: 12 }}>
+    <div style={{ ...pageStyle, alignItems: "center", justifyContent: "center", gap: 12 }}>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
       <Loader size={24} color={C.primary} style={{ animation: "spin 1s linear infinite" }} />
       <span style={{ color: C.muted, fontSize: 13 }}>กำลังโหลด...</span>
@@ -227,19 +335,22 @@ export default function App() {
       `}</style>
 
       {page === "home" && <HomePage sets={SETS} cart={cart} totalItems={totalItems} grandTotal={grandTotal} onSelect={goCustomize} onCartClick={() => setPage("cart")} />}
+
       {page === "customize" && selectedSet && (
-        <div style={S.page}>
+        <div style={pageStyle}>
           <CustomizePage set={selectedSet} spice={spice} setSpice={setSpice} soup={soup} setSoup={setSoup} addonQty={addonQty} stock={stock} updateAddon={updateAddon} orderQty={orderQty} setOrderQty={setOrderQty} includeSideDish={includeSideDish} setIncludeSideDish={setIncludeSideDish} note={note} setNote={setNote} canAdd={canAdd} onBack={() => setPage("home")} onAdd={addToCart} />
         </div>
       )}
+
       {page === "cart" && (
-        <div style={S.page}>
+        <div style={pageStyle}>
           <CartPage cart={cart} grandTotal={grandTotal} totalItems={totalItems} onBack={() => setPage("home")} onAddMore={() => setPage("home")} onCheckout={() => setPage("delivery")} />
         </div>
       )}
+
       {page === "delivery" && (
-        <div style={S.page}>
-          <DeliveryPage custName={custName} setCustName={setCustName} phone={phone} setPhone={setPhone} deliveryType={deliveryType} setDeliveryType={(v) => { setDeliveryType(v); setSelectedRound(null); }} selectedRound={selectedRound} setSelectedRound={setSelectedRound} rounds={rounds} pickup={pickup} grandTotal={grandTotal} canConfirm={canConfirm} submitting={submitting} apiError={apiError} onBack={() => setPage("cart")} onConfirm={submitOrder} />
+        <div style={pageStyle}>
+          <DeliveryPage custName={custName} setCustName={setCustName} phone={phone} setPhone={setPhone} deliveryType={deliveryType} setDeliveryType={v => { setDeliveryType(v); setSelectedRound(null); }} selectedRound={selectedRound} setSelectedRound={setSelectedRound} rounds={rounds} pickup={pickup} grandTotal={grandTotal} canConfirm={canConfirm} submitting={submitting} apiError={apiError} onBack={() => setPage("cart")} onConfirm={submitOrder} />
         </div>
       )}
 
@@ -275,11 +386,10 @@ export default function App() {
   );
 }
 
-// ─── Home Page ──────────────────────────────────────────────────────────────
+// ─── Home Page ───────────────────────────────────────────────────────────────
 function HomePage({ sets, cart, totalItems, grandTotal, onSelect, onCartClick }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", maxWidth: 520, margin: "0 auto", background: C.bg, fontFamily: "'Sarabun', sans-serif", position: "relative" }}>
-      {/* Hero */}
       <div style={{ position: "relative", width: "100%", height: 220, background: "linear-gradient(135deg, #5C1208 0%, #2E0803 100%)", flexShrink: 0 }}>
         <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <span style={{ fontSize: 72, opacity: 0.18 }}>🍲</span>
@@ -295,7 +405,6 @@ function HomePage({ sets, cart, totalItems, grandTotal, onSelect, onCartClick })
         </div>
       </div>
 
-      {/* Menu list */}
       <div style={{ flex: 1, padding: "20px 16px 120px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
           <div style={{ width: 3, height: 18, borderRadius: 2, background: C.primary }} />
@@ -304,17 +413,20 @@ function HomePage({ sets, cart, totalItems, grandTotal, onSelect, onCartClick })
         <div style={{ display: "flex", flexDirection: "column", gap: 1, borderRadius: 16, overflow: "hidden", border: `1px solid ${C.border}`, background: C.card }}>
           {sets.map((set, idx) => (
             <button key={set.id} onClick={() => onSelect(set)} className="tap"
-              style={{ display: "flex", alignItems: "center", gap: 0, padding: 0, background: "transparent", border: "none", cursor: "pointer", textAlign: "left", borderTop: idx > 0 ? `1px solid ${C.border}` : "none" }}>
-              {/* รูป */}
-              <div style={{ width: 100, height: 88, flexShrink: 0, background: "linear-gradient(135deg, #8B3A1A, #5C1208)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <span style={{ fontSize: 36 }}>{set.id === "pork" ? "🥩" : "🦐"}</span>
+              style={{ display: "flex", alignItems: "center", padding: 0, background: "transparent", border: "none", cursor: "pointer", textAlign: "left", borderTop: idx > 0 ? `1px solid ${C.border}` : "none", width: "100%" }}>
+              <div style={{ width: 100, height: 88, flexShrink: 0, background: set.id === "diy" ? "linear-gradient(135deg, #2A5C2A, #1A3A1A)" : "linear-gradient(135deg, #8B3A1A, #5C1208)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <span style={{ fontSize: 36 }}>{set.emoji}</span>
               </div>
-              {/* ข้อมูล */}
               <div style={{ flex: 1, padding: "12px 14px" }}>
-                <p style={{ fontWeight: 700, fontSize: 14, color: C.fg, margin: "0 0 3px" }}>{set.name}</p>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+                  <p style={{ fontWeight: 700, fontSize: 14, color: C.fg, margin: 0 }}>{set.name}</p>
+                  {set.id === "diy" && <span style={{ fontSize: 10, padding: "1px 6px", borderRadius: 10, background: "#E8F5E8", color: "#2A7A2A", fontWeight: 700 }}>DIY</span>}
+                </div>
                 <p style={{ fontSize: 12, color: C.muted, margin: "0 0 8px", lineHeight: 1.4 }}>{set.description}</p>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <span style={{ fontWeight: 800, fontSize: 15, color: C.fg }}>฿{set.price}</span>
+                  <span style={{ fontWeight: 800, fontSize: 15, color: C.fg }}>
+                    {set.id === "diy" ? "เริ่ม " : ""}฿{set.price}
+                  </span>
                   <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.primary, display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <Plus size={16} color="#fff" />
                   </div>
@@ -325,7 +437,6 @@ function HomePage({ sets, cart, totalItems, grandTotal, onSelect, onCartClick })
         </div>
       </div>
 
-      {/* Cart bar */}
       {cart.length > 0 && (
         <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 40, display: "flex", justifyContent: "center", padding: "0 16px 16px" }}>
           <button onClick={onCartClick} className="tap" style={{ width: "100%", maxWidth: 520, background: C.fg, borderRadius: 16, padding: "14px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", border: "none", cursor: "pointer", boxShadow: "0 4px 24px rgba(0,0,0,0.2)" }}>
@@ -343,35 +454,55 @@ function HomePage({ sets, cart, totalItems, grandTotal, onSelect, onCartClick })
   );
 }
 
-// ─── Customize Page ─────────────────────────────────────────────────────────
+// ─── Customize Page ──────────────────────────────────────────────────────────
 function CustomizePage({ set, spice, setSpice, soup, setSoup, addonQty, stock, updateAddon, orderQty, setOrderQty, includeSideDish, setIncludeSideDish, note, setNote, canAdd, onBack, onAdd }) {
   const addonTotal = allAddons.reduce((s, a) => s + a.price * (addonQty[a.id] || 0), 0);
   const itemTotal = (set.price + addonTotal) * orderQty;
+  const isDIY = set.id === "diy";
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh", background: C.bg }}>
       {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px", borderBottom: `1px solid ${C.border}`, flexShrink: 0, background: C.card }}>
-        <button onClick={onBack} className="tap" style={{ width: 34, height: 34, borderRadius: "50%", background: C.input, border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-          <ArrowLeft size={15} color={C.fg} />
+      <div style={{ position: "relative", flexShrink: 0 }}>
+        <ImageGallery images={set.images} emoji={set.emoji} name={set.name} />
+        <button onClick={onBack} className="tap"
+          style={{ position: "absolute", top: 14, left: 14, width: 34, height: 34, borderRadius: "50%", background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", zIndex: 10 }}>
+          <ArrowLeft size={16} color="#fff" />
         </button>
-        <h2 style={{ fontWeight: 700, fontSize: 15, color: C.fg, margin: 0, flex: 1 }}>{set.name}</h2>
-        <span style={{ fontSize: 14, color: C.muted, fontWeight: 600 }}>฿{set.price}</span>
+        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "12px 16px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <h2 style={{ fontWeight: 700, fontSize: 16, color: "#fff", margin: 0 }}>{set.name}</h2>
+              {isDIY && <span style={{ fontSize: 10, padding: "2px 7px", borderRadius: 10, background: "rgba(255,255,255,0.2)", color: "#fff", fontWeight: 700 }}>DIY</span>}
+            </div>
+            <span style={{ fontSize: 14, color: "rgba(255,255,255,0.85)", fontWeight: 700 }}>
+              {isDIY ? "เริ่ม " : ""}฿{set.price}
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Body */}
       <div style={{ flex: 1, overflowY: "auto" }}>
-        {/* ส่วนประกอบ */}
-        <div style={{ padding: "14px 16px", background: C.card, borderBottom: `1px solid ${C.border}` }}>
-          <p style={{ fontSize: 11, fontWeight: 700, color: C.muted, margin: "0 0 8px", letterSpacing: "0.04em" }}>ส่วนประกอบในเซต</p>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-            {set.items.map(it => (
-              <span key={it.name} style={{ fontSize: 11, padding: "3px 10px", borderRadius: 20, background: C.input, color: C.muted, border: `1px solid ${C.border}` }}>
-                {it.name} {it.grams}ก.
-              </span>
-            ))}
+        {/* ส่วนประกอบ (ซ่อนถ้า DIY) */}
+        {!isDIY && set.items.length > 0 && (
+          <div style={{ padding: "14px 16px", background: C.card, borderBottom: `1px solid ${C.border}` }}>
+            <p style={{ fontSize: 11, fontWeight: 700, color: C.muted, margin: "0 0 8px", letterSpacing: "0.04em" }}>ส่วนประกอบในเซต</p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+              {set.items.map(it => (
+                <span key={it.name} style={{ fontSize: 11, padding: "3px 10px", borderRadius: 20, background: C.input, color: C.muted, border: `1px solid ${C.border}` }}>
+                  {it.name} {it.grams}ก.
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
+
+        {isDIY && (
+          <div style={{ padding: "14px 16px", background: "#F0FAF0", borderBottom: `1px solid ${C.border}` }}>
+            <p style={{ fontSize: 12, color: "#2A7A2A", margin: 0, fontWeight: 600 }}>🎉 เลือกวัตถุดิบได้ตามใจ ไม่มีขั้นต่ำ เพิ่มเองได้ทั้งหมดด้านล่าง</p>
+          </div>
+        )}
 
         <div style={{ padding: "20px 16px", display: "flex", flexDirection: "column", gap: 24 }}>
           {/* ความเผ็ด */}
@@ -410,7 +541,7 @@ function CustomizePage({ set, spice, setSpice, soup, setSoup, addonQty, stock, u
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
               <span style={{ fontWeight: 700, fontSize: 14, color: C.fg }}>เพิ่มเครื่อง</span>
-              <span style={{ fontSize: 11, color: C.muted }}>ไม่บังคับ</span>
+              <span style={{ fontSize: 11, color: C.muted }}>{isDIY ? "เลือกได้ตามใจ" : "ไม่บังคับ"}</span>
             </div>
             {ADDON_GROUPS.map(group => (
               <div key={group.label} style={{ marginBottom: 16 }}>
@@ -453,7 +584,7 @@ function CustomizePage({ set, spice, setSpice, soup, setSoup, addonQty, stock, u
             ))}
           </div>
 
-          {/* ของแถม checkbox */}
+          {/* ของแถม */}
           <button onClick={() => setIncludeSideDish(!includeSideDish)} className="tap"
             style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px", borderRadius: 14, border: `1.5px solid ${includeSideDish ? C.primary : C.border}`, background: includeSideDish ? C.tag : C.card, cursor: "pointer", textAlign: "left", width: "100%" }}>
             <div style={{ width: 20, height: 20, borderRadius: 6, border: `2px solid ${includeSideDish ? C.primary : C.border}`, background: includeSideDish ? C.primary : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -519,7 +650,7 @@ function CustomizePage({ set, spice, setSpice, soup, setSoup, addonQty, stock, u
   );
 }
 
-// ─── Cart Page ───────────────────────────────────────────────────────────────
+// ─── Cart Page ────────────────────────────────────────────────────────────────
 function CartPage({ cart, grandTotal, totalItems, onBack, onAddMore, onCheckout }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh", background: C.bg }}>
@@ -557,7 +688,7 @@ function CartPage({ cart, grandTotal, totalItems, onBack, onAddMore, onCheckout 
                     ))}
                   </div>
                 )}
-                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                   {item.includeSideDish && <span style={{ fontSize: 11, color: C.muted }}>🌶 พริก+กระเทียมฟรี</span>}
                   {item.note && <span style={{ fontSize: 11, color: C.muted }}>📝 {item.note}</span>}
                 </div>
@@ -584,7 +715,7 @@ function CartPage({ cart, grandTotal, totalItems, onBack, onAddMore, onCheckout 
   );
 }
 
-// ─── Delivery Page ───────────────────────────────────────────────────────────
+// ─── Delivery Page ────────────────────────────────────────────────────────────
 function DeliveryPage({ custName, setCustName, phone, setPhone, deliveryType, setDeliveryType, selectedRound, setSelectedRound, rounds, pickup, grandTotal, canConfirm, submitting, apiError, onBack, onConfirm }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh", background: C.bg }}>
@@ -596,7 +727,6 @@ function DeliveryPage({ custName, setCustName, phone, setPhone, deliveryType, se
       </div>
 
       <div style={{ flex: 1, overflowY: "auto", padding: "20px 16px" }}>
-        {/* ชื่อ + เบอร์ */}
         {[{ label: "ชื่อ-นามสกุล", val: custName, set: setCustName, type: "text", ph: "กรอกชื่อ-นามสกุล" },
           { label: "เบอร์โทรศัพท์", val: phone, set: setPhone, type: "tel", ph: "กรอกเบอร์โทรศัพท์" }].map(({ label, val, set, type, ph }) => (
           <div key={label} style={{ marginBottom: 18 }}>
@@ -606,7 +736,6 @@ function DeliveryPage({ custName, setCustName, phone, setPhone, deliveryType, se
           </div>
         ))}
 
-        {/* วิธีรับ */}
         <div style={{ marginBottom: 18 }}>
           <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: C.fg, marginBottom: 8 }}>วิธีรับอาหาร</label>
           <div style={{ display: "flex", gap: 5, padding: 5, borderRadius: 14, background: C.input }}>
@@ -619,7 +748,6 @@ function DeliveryPage({ custName, setCustName, phone, setPhone, deliveryType, se
           </div>
         </div>
 
-        {/* รับทันที */}
         {deliveryType === "pickup" && pickup && (
           <div style={{ padding: 14, borderRadius: 14, background: C.card, border: `1px solid ${C.border}`, marginBottom: 18, display: "flex", gap: 10 }}>
             <MapPin size={16} color={C.primary} style={{ flexShrink: 0, marginTop: 2 }} />
@@ -631,7 +759,6 @@ function DeliveryPage({ custName, setCustName, phone, setPhone, deliveryType, se
           </div>
         )}
 
-        {/* ส่งตามรอบ — grid */}
         {deliveryType === "round" && (
           <div style={{ marginBottom: 18 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
