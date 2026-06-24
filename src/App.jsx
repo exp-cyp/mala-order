@@ -7,41 +7,36 @@ const LIFF_ID = "2010455338-s9xBTgbN";
 const C = {
   bg: "#FAFAFA", card: "#FFFFFF", fg: "#111111", muted: "#888888",
   border: "#EBEBEB", input: "#F4F4F4",
-  primary: "#D93026", accent: "#F07A20", line: "#06C755",
+  primary: "#D93026", line: "#06C755",
   tag: "#FFF1F0", tagText: "#D93026",
 };
 
 const SETS = [
   {
-    id: "pork", name: "เซตหมู", price: 99,
+    id: "pork", name: "เซตหมู", price: 99, emoji: "🥩",
     description: "สันคอหมูสไลซ์, สามชั้นสไลซ์, เห็ดรวม, ผักสด, เส้นมันเทศ",
-    emoji: "🥩",
     images: [null, null, null],
     items: [
       { name: "สันคอหมูสไลซ์ + สามชั้น", grams: 120 },
       { name: "เห็ดรวม (หูหนู/เข็มทอง/ออริจิ)", grams: 80 },
-      { name: "ผักกาดขาว", grams: 80 },
-      { name: "ผักบุ้ง", grams: 50 },
+      { name: "ผักกาดขาว", grams: 80 }, { name: "ผักบุ้ง", grams: 50 },
       { name: "เส้นมันเทศใหญ่", grams: 100 },
     ],
   },
   {
-    id: "seafood", name: "เซตทะเล", price: 129,
+    id: "seafood", name: "เซตทะเล", price: 129, emoji: "🦐",
     description: "กุ้ง, หมึก, เห็ดรวม, ผักสด, เส้นมันเทศ",
-    emoji: "🦐",
     images: [null, null, null],
     items: [
       { name: "กุ้ง + หมึก", grams: 120 },
       { name: "เห็ดรวม (หูหนู/เข็มทอง/ออริจิ)", grams: 80 },
-      { name: "ผักกาดขาว", grams: 80 },
-      { name: "ผักบุ้ง", grams: 50 },
+      { name: "ผักกาดขาว", grams: 80 }, { name: "ผักบุ้ง", grams: 50 },
       { name: "เส้นมันเทศเล็ก", grams: 100 },
     ],
   },
   {
-    id: "diy", name: "DIY เลือกเองได้เลย", price: 39,
+    id: "diy", name: "DIY เลือกเองได้เลย", price: 39, emoji: "🍳",
     description: "เลือกวัตถุดิบได้ตามใจ ราคาเริ่มต้น ฿39",
-    emoji: "🍳",
     images: [null, null],
     items: [],
   },
@@ -56,8 +51,7 @@ const SPICE_LEVELS = [
 
 const ADDON_GROUPS = [
   {
-    label: "โปรตีนเพิ่ม",
-    items: [
+    label: "โปรตีนเพิ่ม", items: [
       { id: "A1", name: "สันคอสไลซ์", grams: 60, price: 20 },
       { id: "A2", name: "สามชั้นสไลซ์", grams: 60, price: 20 },
       { id: "A3", name: "กุ้ง", grams: 60, price: 35 },
@@ -65,8 +59,7 @@ const ADDON_GROUPS = [
     ],
   },
   {
-    label: "ผัก / เห็ด",
-    items: [
+    label: "ผัก / เห็ด", items: [
       { id: "B1", name: "เห็ดหูหนู", grams: 60, price: 15 },
       { id: "B2", name: "เห็ดเข็มทอง", grams: 60, price: 15 },
       { id: "B3", name: "เห็ดออริจิ", grams: 60, price: 20 },
@@ -75,8 +68,7 @@ const ADDON_GROUPS = [
     ],
   },
   {
-    label: "เส้น",
-    items: [
+    label: "เส้น", items: [
       { id: "C1", name: "เส้นมันเทศใหญ่", grams: 60, price: 15 },
       { id: "C2", name: "เส้นมันเทศเล็ก", grams: 60, price: 15 },
       { id: "C3", name: "บะหมี่ผัก", grams: 60, price: 15 },
@@ -94,103 +86,92 @@ function LineIcon() {
   );
 }
 
-// ─── Image Gallery Component ────────────────────────────────────────────────
-function ImageGallery({ images, emoji, name }) {
-  const [current, setCurrent] = useState(0);
-  const [lightbox, setLightbox] = useState(false);
-  const [lbIndex, setLbIndex] = useState(0);
-
-  const total = images.length;
-
-  function openLightbox(i) { setLbIndex(i); setLightbox(true); }
-  function closeLightbox() { setLightbox(false); }
-  function prev(e) { e?.stopPropagation(); setLbIndex(i => (i - 1 + total) % total); }
-  function next(e) { e?.stopPropagation(); setLbIndex(i => (i + 1) % total); }
+// ─── Image Gallery ───────────────────────────────────────────────────────────
+function ImageGallery({ images, emoji }) {
+  const [cur, setCur] = useState(0);
+  const [lb, setLb] = useState(false);
+  const [lbIdx, setLbIdx] = useState(0);
+  const n = images.length;
 
   return (
     <>
-      {/* Scrollable thumbnail strip */}
-      <div style={{ position: "relative", height: 240, background: "linear-gradient(135deg, #8B3A1A, #5C1208)", overflow: "hidden" }}>
-        {/* Main display */}
+      <div style={{ position: "relative", height: 240, background: "linear-gradient(135deg,#8B3A1A,#5C1208)", overflow: "hidden" }}>
         <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
-          onClick={() => openLightbox(current)}>
-          {images[current] ? (
-            <img src={images[current]} alt={name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 64, opacity: 0.5 }}>{emoji}</span>
-              <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)" }}>Tap เพื่อดูรูป</span>
-            </div>
-          )}
-          {/* Gradient overlay */}
-          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 50%)" }} />
+          onClick={() => { setLbIdx(cur); setLb(true); }}>
+          {images[cur]
+            ? <img src={images[cur]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            : <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+                <span style={{ fontSize: 56, opacity: 0.45 }}>{emoji}</span>
+                <span style={{ fontSize: 11, color: "rgba(255,255,255,0.35)" }}>Tap เพื่อดูรูป</span>
+              </div>}
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top,rgba(0,0,0,0.45) 0%,transparent 50%)" }} />
         </div>
-
-        {/* Dots + arrows */}
-        {total > 1 && (
-          <>
-            <button onClick={e => { e.stopPropagation(); setCurrent(i => (i - 1 + total) % total); }}
-              style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", width: 32, height: 32, borderRadius: "50%", background: "rgba(0,0,0,0.35)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-              <ChevronLeft size={18} color="#fff" />
-            </button>
-            <button onClick={e => { e.stopPropagation(); setCurrent(i => (i + 1) % total); }}
-              style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", width: 32, height: 32, borderRadius: "50%", background: "rgba(0,0,0,0.35)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-              <ChevronRight size={18} color="#fff" />
-            </button>
-            <div style={{ position: "absolute", bottom: 12, left: "50%", transform: "translateX(-50%)", display: "flex", gap: 5 }}>
-              {images.map((_, i) => (
-                <button key={i} onClick={e => { e.stopPropagation(); setCurrent(i); }}
-                  style={{ width: i === current ? 18 : 6, height: 6, borderRadius: 3, background: i === current ? "#fff" : "rgba(255,255,255,0.45)", border: "none", padding: 0, cursor: "pointer", transition: "width 0.2s" }} />
-              ))}
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* Lightbox */}
-      {lightbox && (
-        <div onClick={closeLightbox}
-          style={{ position: "fixed", inset: 0, zIndex: 100, background: "rgba(0,0,0,0.9)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <button onClick={closeLightbox}
-            style={{ position: "absolute", top: 20, right: 20, width: 36, height: 36, borderRadius: "50%", background: "rgba(255,255,255,0.15)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-            <X size={18} color="#fff" />
+        {n > 1 && <>
+          <button onClick={e => { e.stopPropagation(); setCur(i => (i - 1 + n) % n); }}
+            style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", width: 30, height: 30, borderRadius: "50%", background: "rgba(0,0,0,0.35)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+            <ChevronLeft size={16} color="#fff" />
           </button>
-
-          {total > 1 && (
-            <button onClick={prev}
-              style={{ position: "absolute", left: 16, width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.15)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-              <ChevronLeft size={24} color="#fff" />
-            </button>
-          )}
-
-          <div onClick={e => e.stopPropagation()}
-            style={{ width: "85%", maxWidth: 420, aspectRatio: "1", borderRadius: 20, overflow: "hidden", background: "#333", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            {images[lbIndex] ? (
-              <img src={images[lbIndex]} alt={name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-            ) : (
-              <span style={{ fontSize: 80 }}>{emoji}</span>
-            )}
-          </div>
-
-          {total > 1 && (
-            <button onClick={next}
-              style={{ position: "absolute", right: 16, width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.15)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-              <ChevronRight size={24} color="#fff" />
-            </button>
-          )}
-
-          <div style={{ position: "absolute", bottom: 30, left: "50%", transform: "translateX(-50%)", display: "flex", gap: 6 }}>
+          <button onClick={e => { e.stopPropagation(); setCur(i => (i + 1) % n); }}
+            style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", width: 30, height: 30, borderRadius: "50%", background: "rgba(0,0,0,0.35)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+            <ChevronRight size={16} color="#fff" />
+          </button>
+          <div style={{ position: "absolute", bottom: 10, left: "50%", transform: "translateX(-50%)", display: "flex", gap: 5 }}>
             {images.map((_, i) => (
-              <div key={i} style={{ width: i === lbIndex ? 20 : 7, height: 7, borderRadius: 4, background: i === lbIndex ? "#fff" : "rgba(255,255,255,0.4)", transition: "width 0.2s" }} />
+              <button key={i} onClick={e => { e.stopPropagation(); setCur(i); }}
+                style={{ width: i === cur ? 18 : 6, height: 6, borderRadius: 3, background: i === cur ? "#fff" : "rgba(255,255,255,0.4)", border: "none", padding: 0, cursor: "pointer", transition: "width 0.2s" }} />
             ))}
           </div>
+        </>}
+      </div>
+
+      {lb && (
+        <div onClick={() => setLb(false)}
+          style={{ position: "fixed", inset: 0, zIndex: 100, background: "rgba(0,0,0,0.92)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <button onClick={() => setLb(false)}
+            style={{ position: "absolute", top: 18, right: 18, width: 34, height: 34, borderRadius: "50%", background: "rgba(255,255,255,0.12)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+            <X size={16} color="#fff" />
+          </button>
+          {n > 1 && <>
+            <button onClick={e => { e.stopPropagation(); setLbIdx(i => (i - 1 + n) % n); }}
+              style={{ position: "absolute", left: 12, width: 40, height: 40, borderRadius: "50%", background: "rgba(255,255,255,0.12)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+              <ChevronLeft size={22} color="#fff" />
+            </button>
+            <button onClick={e => { e.stopPropagation(); setLbIdx(i => (i + 1) % n); }}
+              style={{ position: "absolute", right: 12, width: 40, height: 40, borderRadius: "50%", background: "rgba(255,255,255,0.12)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+              <ChevronRight size={22} color="#fff" />
+            </button>
+          </>}
+          <div onClick={e => e.stopPropagation()}
+            style={{ width: "82%", maxWidth: 400, aspectRatio: "1", borderRadius: 18, overflow: "hidden", background: "#333", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            {images[lbIdx] ? <img src={images[lbIdx]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ fontSize: 72 }}>{emoji}</span>}
+          </div>
+          {n > 1 && (
+            <div style={{ position: "absolute", bottom: 28, left: "50%", transform: "translateX(-50%)", display: "flex", gap: 6 }}>
+              {images.map((_, i) => (
+                <div key={i} style={{ width: i === lbIdx ? 20 : 7, height: 7, borderRadius: 4, background: i === lbIdx ? "#fff" : "rgba(255,255,255,0.35)", transition: "width 0.2s" }} />
+              ))}
+            </div>
+          )}
         </div>
       )}
     </>
   );
 }
 
-// ─── Main App ────────────────────────────────────────────────────────────────
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+// คำนวณ addon ที่ถูก reserve ใน cart ทั้งหมด (ไม่นับ currentCartItemId ถ้าระบุ)
+function calcCartReserved(cart, excludeId = null) {
+  const reserved = {};
+  cart.forEach(item => {
+    if (item.id === excludeId) return;
+    item.addons.forEach(a => {
+      reserved[a.id] = (reserved[a.id] || 0) + a.qty * item.qty;
+    });
+  });
+  return reserved;
+}
+
+// ─── Main App ─────────────────────────────────────────────────────────────────
 export default function App() {
   const [page, setPage] = useState("home");
   const [selectedSet, setSelectedSet] = useState(null);
@@ -198,19 +179,22 @@ export default function App() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [orderId, setOrderId] = useState(null);
 
-  const [spice, setSpice] = useState("");
+  // customize state
   const [soup, setSoup] = useState("");
+  const [spice, setSpice] = useState("");
   const [addonQty, setAddonQty] = useState({});
   const [orderQty, setOrderQty] = useState(1);
   const [includeSideDish, setIncludeSideDish] = useState(true);
   const [note, setNote] = useState("");
 
+  // delivery state
   const [custName, setCustName] = useState("");
   const [phone, setPhone] = useState("");
   const [deliveryType, setDeliveryType] = useState("");
   const [selectedRound, setSelectedRound] = useState(null);
 
-  const [stock, setStock] = useState({});
+  // API data — stock เก็บ bags_remaining จริงจาก server
+  const [serverStock, setServerStock] = useState({});
   const [rounds, setRounds] = useState([]);
   const [pickup, setPickup] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -228,13 +212,17 @@ export default function App() {
         const profile = await liff.getProfile();
         setLineUserId(profile.userId);
         setDisplayName(profile.displayName);
-      } catch (err) { console.error("LIFF init error:", err); }
+      } catch (err) { console.error("LIFF init:", err); }
 
       const cbName = "jcb_" + Date.now();
       const script = document.createElement("script");
       window[cbName] = (data) => {
-        setStock(data.stock || {}); setRounds(data.rounds || []); setPickup(data.pickup || {});
-        setLoading(false); delete window[cbName]; document.body.removeChild(script);
+        setServerStock(data.stock || {});
+        setRounds(data.rounds || []);
+        setPickup(data.pickup || {});
+        setLoading(false);
+        delete window[cbName];
+        document.body.removeChild(script);
       };
       script.src = `${APPS_SCRIPT_URL}?action=getInitData&callback=${cbName}`;
       script.onerror = () => setLoading(false);
@@ -246,18 +234,30 @@ export default function App() {
   const grandTotal = useMemo(() => cart.reduce((s, i) => s + i.totalPrice, 0), [cart]);
   const totalItems = useMemo(() => cart.reduce((s, i) => s + i.qty, 0), [cart]);
 
-  function getStockAvailable(id) {
-    const stockItem = stock[id];
-    if (!stockItem) return 0;
-    const inCart = cart.reduce((sum, ci) => sum + (ci.addons.find(a => a.id === id)?.qty || 0), 0);
-    return stockItem.bags_remaining - inCart;
+  // Stock ที่เหลือจริง = server stock - ของที่ reserve ใน cart แล้ว
+  const cartReserved = useMemo(() => calcCartReserved(cart), [cart]);
+
+  function effectiveStock(id) {
+    const serverAmt = serverStock[id]?.bags_remaining || 0;
+    const reserved = cartReserved[id] || 0;
+    return Math.max(0, serverAmt - reserved);
+  }
+
+  // ใน customize page: available สำหรับ addon id นี้
+  // = effectiveStock - (addonQty[id] * orderQty ที่กำลัง config อยู่แล้ว)
+  // แต่ addonQty ยังไม่ได้ add to cart ดังนั้น effectiveStock คือ max ที่เลือกได้ทั้งหมด
+  // ต้องคำนวณว่าเลือกได้กี่ถุงต่อ orderQty
+  function maxAddonPerUnit(id) {
+    const avail = effectiveStock(id);
+    if (orderQty <= 0) return 0;
+    return Math.floor(avail / orderQty);
   }
 
   function updateAddon(id, delta) {
-    const maxTotal = getStockAvailable(id);
     setAddonQty(prev => {
       const cur = prev[id] || 0;
-      if (delta > 0 && (cur + 1) * orderQty > maxTotal) return prev;
+      const max = maxAddonPerUnit(id);
+      if (delta > 0 && cur >= max) return prev;
       const next = Math.max(0, cur + delta);
       return { ...prev, [id]: next };
     });
@@ -265,24 +265,37 @@ export default function App() {
 
   function goCustomize(set) {
     setSelectedSet(set);
-    setSpice(""); setSoup(""); setAddonQty({}); setOrderQty(1);
-    setIncludeSideDish(true); setNote("");
+    setSoup(""); setSpice(""); setAddonQty({});
+    setOrderQty(1); setIncludeSideDish(true); setNote("");
     setPage("customize");
   }
 
   function addToCart() {
     const addons = allAddons.filter(a => (addonQty[a.id] || 0) > 0)
-      .map(a => ({ id: a.id, name: a.name, grams: stock[a.id]?.grams || a.grams, qty: addonQty[a.id], price: a.price }));
+      .map(a => ({ id: a.id, name: a.name, grams: serverStock[a.id]?.grams || a.grams, qty: addonQty[a.id], price: a.price }));
     const addonTotal = addons.reduce((s, a) => s + a.price * a.qty, 0);
     const totalPrice = (selectedSet.price + addonTotal) * orderQty;
     setCart(prev => [...prev, {
-      id: Date.now() + "", set: selectedSet, spice, soup, addons,
-      includeSideDish, note, qty: orderQty, totalPrice,
+      id: Date.now() + "", set: selectedSet, spice, soup,
+      addons, includeSideDish, note, qty: orderQty, totalPrice,
     }]);
     setPage("home");
   }
 
-  const canAdd = spice !== "" && soup !== "";
+  function removeFromCart(id) {
+    setCart(prev => prev.filter(i => i.id !== id));
+  }
+
+  // UX: soup เลือกแล้ว + ซุปน้ำดำ ไม่ต้องเลือกความเผ็ด
+  const needSpice = soup === "ซุปหมาล่า";
+  const canAdd = soup !== "" && (!needSpice || spice !== "");
+
+  // ข้อความปุ่มใส่ตะกร้า
+  function addBtnLabel(itemTotal) {
+    if (!soup) return "กรุณาเลือกน้ำซุป";
+    if (needSpice && !spice) return "กรุณาเลือกระดับความเผ็ด";
+    return `ใส่ตะกร้า · ฿${itemTotal.toLocaleString()}`;
+  }
 
   const canConfirm = custName.trim() && phone.trim() && deliveryType &&
     (deliveryType === "pickup" || (deliveryType === "round" && selectedRound));
@@ -296,7 +309,7 @@ export default function App() {
           action: "submitOrder", lineUserId,
           displayName: displayName || custName, custName, phone,
           items: cart.map(item => ({
-            set: item.set.name, spice: item.spice, soup: item.soup,
+            set: item.set.name, spice: item.spice || "-", soup: item.soup,
             addons: item.addons, includeSideDish: item.includeSideDish,
             note: item.note, qty: item.qty, itemTotal: item.totalPrice,
           })),
@@ -334,23 +347,56 @@ export default function App() {
         @keyframes spin{to{transform:rotate(360deg)}}
       `}</style>
 
-      {page === "home" && <HomePage sets={SETS} cart={cart} totalItems={totalItems} grandTotal={grandTotal} onSelect={goCustomize} onCartClick={() => setPage("cart")} />}
+      {page === "home" && (
+        <HomePage sets={SETS} cart={cart} totalItems={totalItems} grandTotal={grandTotal}
+          onSelect={goCustomize} onCartClick={() => setPage("cart")} />
+      )}
 
       {page === "customize" && selectedSet && (
         <div style={pageStyle}>
-          <CustomizePage set={selectedSet} spice={spice} setSpice={setSpice} soup={soup} setSoup={setSoup} addonQty={addonQty} stock={stock} updateAddon={updateAddon} orderQty={orderQty} setOrderQty={setOrderQty} includeSideDish={includeSideDish} setIncludeSideDish={setIncludeSideDish} note={note} setNote={setNote} canAdd={canAdd} onBack={() => setPage("home")} onAdd={addToCart} />
+          <CustomizePage
+            set={selectedSet} soup={soup} setSoup={s => { setSoup(s); if (s !== "ซุปหมาล่า") setSpice(""); }}
+            spice={spice} setSpice={setSpice} needSpice={needSpice}
+            addonQty={addonQty} serverStock={serverStock} maxAddonPerUnit={maxAddonPerUnit}
+            updateAddon={updateAddon} orderQty={orderQty}
+            setOrderQty={newQty => {
+              // re-cap addons when qty changes
+              setAddonQty(prev => {
+                const next = { ...prev };
+                allAddons.forEach(a => {
+                  const avail = effectiveStock(a.id);
+                  const newMax = newQty > 0 ? Math.floor(avail / newQty) : 0;
+                  if ((prev[a.id] || 0) > newMax) next[a.id] = newMax;
+                });
+                return next;
+              });
+              setOrderQty(newQty);
+            }}
+            includeSideDish={includeSideDish} setIncludeSideDish={setIncludeSideDish}
+            note={note} setNote={setNote}
+            canAdd={canAdd} addBtnLabel={addBtnLabel}
+            onBack={() => setPage("home")} onAdd={addToCart}
+          />
         </div>
       )}
 
       {page === "cart" && (
         <div style={pageStyle}>
-          <CartPage cart={cart} grandTotal={grandTotal} totalItems={totalItems} onBack={() => setPage("home")} onAddMore={() => setPage("home")} onCheckout={() => setPage("delivery")} />
+          <CartPage cart={cart} grandTotal={grandTotal} totalItems={totalItems}
+            onBack={() => setPage("home")} onAddMore={() => setPage("home")}
+            onRemove={removeFromCart} onCheckout={() => setPage("delivery")} />
         </div>
       )}
 
       {page === "delivery" && (
         <div style={pageStyle}>
-          <DeliveryPage custName={custName} setCustName={setCustName} phone={phone} setPhone={setPhone} deliveryType={deliveryType} setDeliveryType={v => { setDeliveryType(v); setSelectedRound(null); }} selectedRound={selectedRound} setSelectedRound={setSelectedRound} rounds={rounds} pickup={pickup} grandTotal={grandTotal} canConfirm={canConfirm} submitting={submitting} apiError={apiError} onBack={() => setPage("cart")} onConfirm={submitOrder} />
+          <DeliveryPage custName={custName} setCustName={setCustName}
+            phone={phone} setPhone={setPhone}
+            deliveryType={deliveryType} setDeliveryType={v => { setDeliveryType(v); setSelectedRound(null); }}
+            selectedRound={selectedRound} setSelectedRound={setSelectedRound}
+            rounds={rounds} pickup={pickup} grandTotal={grandTotal}
+            canConfirm={canConfirm} submitting={submitting} apiError={apiError}
+            onBack={() => setPage("cart")} onConfirm={submitOrder} />
         </div>
       )}
 
@@ -368,7 +414,9 @@ export default function App() {
               </div>
             </div>
             <div style={{ background: C.input, borderRadius: 16, padding: 16, marginBottom: 20 }}>
-              {[["รหัสออเดอร์", orderId], ["ยอดรวม", `฿${grandTotal.toLocaleString()}`], ["วิธีรับ", deliveryType === "pickup" ? "รับทันทีที่จุดนัด" : `ส่งรอบ ${selectedRound}`]].map(([k, v]) => (
+              {[["รหัสออเดอร์", orderId], ["ยอดรวม", `฿${grandTotal.toLocaleString()}`],
+                ["วิธีรับ", deliveryType === "pickup" ? "รับทันทีที่จุดนัด" : `ส่งรอบ ${selectedRound}`]
+              ].map(([k, v]) => (
                 <div key={k} style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
                   <span style={{ fontSize: 13, color: C.muted }}>{k}</span>
                   <span style={{ fontWeight: 700, fontSize: 13, color: C.fg }}>{v}</span>
@@ -386,22 +434,22 @@ export default function App() {
   );
 }
 
-// ─── Home Page ───────────────────────────────────────────────────────────────
+// ─── Home Page ────────────────────────────────────────────────────────────────
 function HomePage({ sets, cart, totalItems, grandTotal, onSelect, onCartClick }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", maxWidth: 520, margin: "0 auto", background: C.bg, fontFamily: "'Sarabun', sans-serif", position: "relative" }}>
-      <div style={{ position: "relative", width: "100%", height: 220, background: "linear-gradient(135deg, #5C1208 0%, #2E0803 100%)", flexShrink: 0 }}>
+      <div style={{ position: "relative", width: "100%", height: 220, background: "linear-gradient(135deg,#5C1208,#2E0803)", flexShrink: 0 }}>
         <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <span style={{ fontSize: 72, opacity: 0.18 }}>🍲</span>
         </div>
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(10,2,0,0.6) 0%, transparent 60%)" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top,rgba(10,2,0,0.6) 0%,transparent 60%)" }} />
         <button onClick={onCartClick} className="tap" style={{ position: "absolute", top: 16, right: 16, width: 40, height: 40, borderRadius: "50%", background: "rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
           <ShoppingCart size={18} color="#fff" />
           {totalItems > 0 && <span style={{ position: "absolute", top: -5, right: -5, width: 18, height: 18, borderRadius: "50%", background: C.primary, color: "#fff", fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>{totalItems}</span>}
         </button>
         <div style={{ position: "absolute", bottom: 20, left: 20 }}>
           <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.2em", color: "rgba(255,210,170,0.7)", margin: "0 0 6px" }}>MALA HOTPOT</p>
-          <h1 style={{ fontSize: 30, fontWeight: 800, color: "#fff", margin: 0, lineHeight: 1.2 }}>คิดถึงหมาล่า</h1>
+          <h1 style={{ fontSize: 30, fontWeight: 800, color: "#fff", margin: 0 }}>คิดถึงหมาล่า</h1>
         </div>
       </div>
 
@@ -414,7 +462,7 @@ function HomePage({ sets, cart, totalItems, grandTotal, onSelect, onCartClick })
           {sets.map((set, idx) => (
             <button key={set.id} onClick={() => onSelect(set)} className="tap"
               style={{ display: "flex", alignItems: "center", padding: 0, background: "transparent", border: "none", cursor: "pointer", textAlign: "left", borderTop: idx > 0 ? `1px solid ${C.border}` : "none", width: "100%" }}>
-              <div style={{ width: 100, height: 88, flexShrink: 0, background: set.id === "diy" ? "linear-gradient(135deg, #2A5C2A, #1A3A1A)" : "linear-gradient(135deg, #8B3A1A, #5C1208)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ width: 100, height: 88, flexShrink: 0, background: set.id === "diy" ? "linear-gradient(135deg,#2A5C2A,#1A3A1A)" : "linear-gradient(135deg,#8B3A1A,#5C1208)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <span style={{ fontSize: 36 }}>{set.emoji}</span>
               </div>
               <div style={{ flex: 1, padding: "12px 14px" }}>
@@ -424,9 +472,7 @@ function HomePage({ sets, cart, totalItems, grandTotal, onSelect, onCartClick })
                 </div>
                 <p style={{ fontSize: 12, color: C.muted, margin: "0 0 8px", lineHeight: 1.4 }}>{set.description}</p>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <span style={{ fontWeight: 800, fontSize: 15, color: C.fg }}>
-                    {set.id === "diy" ? "เริ่ม " : ""}฿{set.price}
-                  </span>
+                  <span style={{ fontWeight: 800, fontSize: 15, color: C.fg }}>{set.id === "diy" ? "เริ่ม " : ""}฿{set.price}</span>
                   <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.primary, display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <Plus size={16} color="#fff" />
                   </div>
@@ -454,40 +500,38 @@ function HomePage({ sets, cart, totalItems, grandTotal, onSelect, onCartClick })
   );
 }
 
-// ─── Customize Page ──────────────────────────────────────────────────────────
-function CustomizePage({ set, spice, setSpice, soup, setSoup, addonQty, stock, updateAddon, orderQty, setOrderQty, includeSideDish, setIncludeSideDish, note, setNote, canAdd, onBack, onAdd }) {
+// ─── Customize Page ───────────────────────────────────────────────────────────
+function CustomizePage({ set, soup, setSoup, spice, setSpice, needSpice, addonQty, serverStock, maxAddonPerUnit, updateAddon, orderQty, setOrderQty, includeSideDish, setIncludeSideDish, note, setNote, canAdd, addBtnLabel, onBack, onAdd }) {
+  const isDIY = set.id === "diy";
   const addonTotal = allAddons.reduce((s, a) => s + a.price * (addonQty[a.id] || 0), 0);
   const itemTotal = (set.price + addonTotal) * orderQty;
-  const isDIY = set.id === "diy";
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh", background: C.bg }}>
-      {/* Header */}
+      {/* Image gallery + back btn */}
       <div style={{ position: "relative", flexShrink: 0 }}>
         <ImageGallery images={set.images} emoji={set.emoji} name={set.name} />
         <button onClick={onBack} className="tap"
           style={{ position: "absolute", top: 14, left: 14, width: 34, height: 34, borderRadius: "50%", background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", zIndex: 10 }}>
           <ArrowLeft size={16} color="#fff" />
         </button>
-        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "12px 16px" }}>
+        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "10px 16px" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <h2 style={{ fontWeight: 700, fontSize: 16, color: "#fff", margin: 0 }}>{set.name}</h2>
+              <h2 style={{ fontWeight: 700, fontSize: 15, color: "#fff", margin: 0 }}>{set.name}</h2>
               {isDIY && <span style={{ fontSize: 10, padding: "2px 7px", borderRadius: 10, background: "rgba(255,255,255,0.2)", color: "#fff", fontWeight: 700 }}>DIY</span>}
             </div>
-            <span style={{ fontSize: 14, color: "rgba(255,255,255,0.85)", fontWeight: 700 }}>
-              {isDIY ? "เริ่ม " : ""}฿{set.price}
-            </span>
+            <span style={{ fontSize: 13, color: "rgba(255,255,255,0.85)", fontWeight: 700 }}>{isDIY ? "เริ่ม " : ""}฿{set.price}</span>
           </div>
         </div>
       </div>
 
-      {/* Body */}
+      {/* Scrollable body */}
       <div style={{ flex: 1, overflowY: "auto" }}>
-        {/* ส่วนประกอบ (ซ่อนถ้า DIY) */}
+        {/* ส่วนประกอบ */}
         {!isDIY && set.items.length > 0 && (
-          <div style={{ padding: "14px 16px", background: C.card, borderBottom: `1px solid ${C.border}` }}>
-            <p style={{ fontSize: 11, fontWeight: 700, color: C.muted, margin: "0 0 8px", letterSpacing: "0.04em" }}>ส่วนประกอบในเซต</p>
+          <div style={{ padding: "12px 16px", background: C.card, borderBottom: `1px solid ${C.border}` }}>
+            <p style={{ fontSize: 11, fontWeight: 700, color: C.muted, margin: "0 0 7px", letterSpacing: "0.04em" }}>ส่วนประกอบในเซต</p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
               {set.items.map(it => (
                 <span key={it.name} style={{ fontSize: 11, padding: "3px 10px", borderRadius: 20, background: C.input, color: C.muted, border: `1px solid ${C.border}` }}>
@@ -497,31 +541,15 @@ function CustomizePage({ set, spice, setSpice, soup, setSoup, addonQty, stock, u
             </div>
           </div>
         )}
-
         {isDIY && (
-          <div style={{ padding: "14px 16px", background: "#F0FAF0", borderBottom: `1px solid ${C.border}` }}>
-            <p style={{ fontSize: 12, color: "#2A7A2A", margin: 0, fontWeight: 600 }}>🎉 เลือกวัตถุดิบได้ตามใจ ไม่มีขั้นต่ำ เพิ่มเองได้ทั้งหมดด้านล่าง</p>
+          <div style={{ padding: "12px 16px", background: "#F0FAF0", borderBottom: `1px solid ${C.border}` }}>
+            <p style={{ fontSize: 12, color: "#2A7A2A", margin: 0, fontWeight: 600 }}>🎉 เลือกวัตถุดิบได้ตามใจ เพิ่มเองได้ทั้งหมดด้านล่าง</p>
           </div>
         )}
 
         <div style={{ padding: "20px 16px", display: "flex", flexDirection: "column", gap: 24 }}>
-          {/* ความเผ็ด */}
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-              <span style={{ fontWeight: 700, fontSize: 14, color: C.fg }}>ระดับความเผ็ด</span>
-              <span style={{ fontSize: 10, padding: "2px 7px", borderRadius: 20, background: C.tag, color: C.tagText, fontWeight: 600 }}>จำเป็น</span>
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8 }}>
-              {SPICE_LEVELS.map(({ key, label }) => (
-                <button key={key} onClick={() => setSpice(key)} className="tap"
-                  style={{ padding: "11px 6px", borderRadius: 12, border: spice === key ? `2px solid ${C.primary}` : `1.5px solid ${C.border}`, background: spice === key ? C.tag : C.card, color: spice === key ? C.primary : C.fg, fontWeight: 600, fontSize: 13, cursor: "pointer" }}>
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
 
-          {/* ซุป */}
+          {/* 1. ประเภทซุป (ก่อน) */}
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
               <span style={{ fontWeight: 700, fontSize: 14, color: C.fg }}>ประเภทซุป</span>
@@ -537,24 +565,43 @@ function CustomizePage({ set, spice, setSpice, soup, setSoup, addonQty, stock, u
             </div>
           </div>
 
-          {/* Add-ons */}
+          {/* 2. ระดับความเผ็ด (แสดงเฉพาะซุปหมาล่า) */}
+          {needSpice && (
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                <span style={{ fontWeight: 700, fontSize: 14, color: C.fg }}>ระดับความเผ็ด</span>
+                <span style={{ fontSize: 10, padding: "2px 7px", borderRadius: 20, background: C.tag, color: C.tagText, fontWeight: 600 }}>จำเป็น</span>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8 }}>
+                {SPICE_LEVELS.map(({ key, label }) => (
+                  <button key={key} onClick={() => setSpice(key)} className="tap"
+                    style={{ padding: "11px 6px", borderRadius: 12, border: spice === key ? `2px solid ${C.primary}` : `1.5px solid ${C.border}`, background: spice === key ? C.tag : C.card, color: spice === key ? C.primary : C.fg, fontWeight: 600, fontSize: 13, cursor: "pointer" }}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 3. เพิ่มเครื่อง */}
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
               <span style={{ fontWeight: 700, fontSize: 14, color: C.fg }}>เพิ่มเครื่อง</span>
               <span style={{ fontSize: 11, color: C.muted }}>{isDIY ? "เลือกได้ตามใจ" : "ไม่บังคับ"}</span>
             </div>
             {ADDON_GROUPS.map(group => (
-              <div key={group.label} style={{ marginBottom: 16 }}>
-                <p style={{ fontSize: 11, fontWeight: 700, color: C.muted, margin: "0 0 8px", letterSpacing: "0.04em" }}>{group.label}</p>
+              <div key={group.label} style={{ marginBottom: 14 }}>
+                <p style={{ fontSize: 11, fontWeight: 700, color: C.muted, margin: "0 0 7px", letterSpacing: "0.04em" }}>{group.label}</p>
                 <div style={{ borderRadius: 14, overflow: "hidden", border: `1px solid ${C.border}`, background: C.card }}>
                   {group.items.map((addon, i) => {
                     const qty = addonQty[addon.id] || 0;
-                    const stockItem = stock[addon.id];
-                    const totalAvailable = stockItem ? stockItem.bags_remaining : 0;
-                    const soldOut = totalAvailable <= 0;
-                    const maxQty = orderQty > 0 ? Math.floor(totalAvailable / orderQty) : 0;
-                    const atMax = qty >= maxQty;
+                    const stockItem = serverStock[addon.id];
+                    const maxPerUnit = maxAddonPerUnit(addon.id);
+                    const totalAvail = stockItem?.bags_remaining || 0;
+                    const soldOut = totalAvail <= 0;
+                    const atMax = qty >= maxPerUnit;
                     const grams = stockItem?.grams || addon.grams;
+
                     return (
                       <div key={addon.id} style={{ display: "flex", alignItems: "center", padding: "12px 14px", borderBottom: i < group.items.length - 1 ? `1px solid ${C.border}` : "none", opacity: soldOut ? 0.45 : 1 }}>
                         <div style={{ flex: 1, marginRight: 10 }}>
@@ -562,7 +609,7 @@ function CustomizePage({ set, spice, setSpice, soup, setSoup, addonQty, stock, u
                           <p style={{ fontSize: 11, color: C.muted, margin: 0 }}>
                             {grams}ก./ชุด · +{addon.price}฿
                             {soldOut && <span style={{ color: C.primary, marginLeft: 6 }}>หมดแล้ว</span>}
-                            {!soldOut && totalAvailable <= 3 && <span style={{ color: "#E07000", marginLeft: 6 }}>เหลือ {totalAvailable}</span>}
+                            {!soldOut && maxPerUnit <= 2 && maxPerUnit > 0 && <span style={{ color: "#E07000", marginLeft: 6 }}>เหลือ {maxPerUnit}</span>}
                           </p>
                         </div>
                         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -584,7 +631,7 @@ function CustomizePage({ set, spice, setSpice, soup, setSoup, addonQty, stock, u
             ))}
           </div>
 
-          {/* ของแถม */}
+          {/* 4. ของแถม */}
           <button onClick={() => setIncludeSideDish(!includeSideDish)} className="tap"
             style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px", borderRadius: 14, border: `1.5px solid ${includeSideDish ? C.primary : C.border}`, background: includeSideDish ? C.tag : C.card, cursor: "pointer", textAlign: "left", width: "100%" }}>
             <div style={{ width: 20, height: 20, borderRadius: 6, border: `2px solid ${includeSideDish ? C.primary : C.border}`, background: includeSideDish ? C.primary : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -596,7 +643,7 @@ function CustomizePage({ set, spice, setSpice, soup, setSoup, addonQty, stock, u
             </div>
           </button>
 
-          {/* Note */}
+          {/* 5. Note */}
           <div>
             <p style={{ fontSize: 13, fontWeight: 700, color: C.fg, margin: "0 0 8px" }}>หมายเหตุเพิ่มเติม</p>
             <textarea value={note} onChange={e => setNote(e.target.value)} placeholder="เช่น ไม่ใส่กระเทียม, แพ้อาหาร..." rows={3}
@@ -605,44 +652,25 @@ function CustomizePage({ set, spice, setSpice, soup, setSoup, addonQty, stock, u
         </div>
       </div>
 
-      {/* Bottom */}
+      {/* Bottom bar */}
       <div style={{ padding: "12px 16px", borderTop: `1px solid ${C.border}`, background: C.card, flexShrink: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {/* Qty picker */}
           <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", borderRadius: 12, border: `1.5px solid ${C.border}` }}>
-            <button onClick={() => {
-              const newQty = Math.max(1, orderQty - 1);
-              setAddonQty(prev => {
-                const next = { ...prev };
-                allAddons.forEach(a => {
-                  const max = stock[a.id]?.bags_remaining || 0;
-                  if ((prev[a.id] || 0) * newQty > max) next[a.id] = Math.floor(max / newQty);
-                });
-                return next;
-              });
-              setOrderQty(newQty);
-            }} className="tap" style={{ background: "none", border: "none", cursor: "pointer", display: "flex" }}>
+            <button onClick={() => setOrderQty(Math.max(1, orderQty - 1))} className="tap"
+              style={{ background: "none", border: "none", cursor: "pointer", display: "flex" }}>
               <Minus size={15} color={C.fg} />
             </button>
             <span style={{ fontWeight: 700, fontSize: 15, color: C.fg, minWidth: 18, textAlign: "center" }}>{orderQty}</span>
-            <button onClick={() => {
-              const newQty = orderQty + 1;
-              setAddonQty(prev => {
-                const next = { ...prev };
-                allAddons.forEach(a => {
-                  const max = stock[a.id]?.bags_remaining || 0;
-                  const cur = prev[a.id] || 0;
-                  if (cur * newQty > max) next[a.id] = Math.floor(max / newQty);
-                });
-                return next;
-              });
-              setOrderQty(newQty);
-            }} className="tap" style={{ background: "none", border: "none", cursor: "pointer", display: "flex" }}>
+            <button onClick={() => setOrderQty(orderQty + 1)} className="tap"
+              style={{ background: "none", border: "none", cursor: "pointer", display: "flex" }}>
               <Plus size={15} color={C.fg} />
             </button>
           </div>
-          <button onClick={onAdd} disabled={!canAdd} className="tap"
-            style={{ flex: 1, padding: "13px 0", borderRadius: 12, border: "none", background: canAdd ? C.primary : C.input, color: canAdd ? "#fff" : C.muted, fontWeight: 700, fontSize: 14, cursor: canAdd ? "pointer" : "not-allowed" }}>
-            {canAdd ? `ใส่ตะกร้า · ฿${itemTotal.toLocaleString()}` : "เลือกความเผ็ดและซุปก่อน"}
+          {/* Add to cart */}
+          <button onClick={canAdd ? onAdd : undefined} className="tap"
+            style={{ flex: 1, padding: "13px 0", borderRadius: 12, border: "none", background: canAdd ? C.primary : C.input, color: canAdd ? "#fff" : C.muted, fontWeight: 700, fontSize: 13, cursor: canAdd ? "pointer" : "not-allowed" }}>
+            {addBtnLabel(itemTotal)}
           </button>
         </div>
       </div>
@@ -650,8 +678,8 @@ function CustomizePage({ set, spice, setSpice, soup, setSoup, addonQty, stock, u
   );
 }
 
-// ─── Cart Page ────────────────────────────────────────────────────────────────
-function CartPage({ cart, grandTotal, totalItems, onBack, onAddMore, onCheckout }) {
+// ─── Cart Page ─────────────────────────────────────────────────────────────────
+function CartPage({ cart, grandTotal, totalItems, onBack, onAddMore, onRemove, onCheckout }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh", background: C.bg }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px", borderBottom: `1px solid ${C.border}`, flexShrink: 0, background: C.card }}>
@@ -672,12 +700,20 @@ function CartPage({ cart, grandTotal, totalItems, onBack, onAddMore, onCheckout 
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {cart.map(item => (
               <div key={item.id} style={{ padding: 16, borderRadius: 16, background: C.card, border: `1px solid ${C.border}` }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
                   <div>
                     <p style={{ fontWeight: 700, fontSize: 14, color: C.fg, margin: "0 0 2px" }}>{item.set.name} ×{item.qty}</p>
-                    <p style={{ fontSize: 12, color: C.muted, margin: 0 }}>{item.soup} · เผ็ด{item.spice}</p>
+                    <p style={{ fontSize: 12, color: C.muted, margin: 0 }}>
+                      {item.soup}{item.spice ? ` · เผ็ด${item.spice}` : ""}
+                    </p>
                   </div>
-                  <span style={{ fontWeight: 800, fontSize: 15, color: C.fg }}>฿{item.totalPrice.toLocaleString()}</span>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
+                    <span style={{ fontWeight: 800, fontSize: 15, color: C.fg }}>฿{item.totalPrice.toLocaleString()}</span>
+                    <button onClick={() => onRemove(item.id)} className="tap"
+                      style={{ fontSize: 11, color: C.primary, background: "none", border: "none", cursor: "pointer", padding: 0, fontFamily: "'Sarabun', sans-serif" }}>
+                      ลบ
+                    </button>
+                  </div>
                 </div>
                 {item.addons.length > 0 && (
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 6 }}>
@@ -715,7 +751,7 @@ function CartPage({ cart, grandTotal, totalItems, onBack, onAddMore, onCheckout 
   );
 }
 
-// ─── Delivery Page ────────────────────────────────────────────────────────────
+// ─── Delivery Page ─────────────────────────────────────────────────────────────
 function DeliveryPage({ custName, setCustName, phone, setPhone, deliveryType, setDeliveryType, selectedRound, setSelectedRound, rounds, pickup, grandTotal, canConfirm, submitting, apiError, onBack, onConfirm }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh", background: C.bg }}>
@@ -728,7 +764,8 @@ function DeliveryPage({ custName, setCustName, phone, setPhone, deliveryType, se
 
       <div style={{ flex: 1, overflowY: "auto", padding: "20px 16px" }}>
         {[{ label: "ชื่อ-นามสกุล", val: custName, set: setCustName, type: "text", ph: "กรอกชื่อ-นามสกุล" },
-          { label: "เบอร์โทรศัพท์", val: phone, set: setPhone, type: "tel", ph: "กรอกเบอร์โทรศัพท์" }].map(({ label, val, set, type, ph }) => (
+          { label: "เบอร์โทรศัพท์", val: phone, set: setPhone, type: "tel", ph: "กรอกเบอร์โทรศัพท์" }
+        ].map(({ label, val, set, type, ph }) => (
           <div key={label} style={{ marginBottom: 18 }}>
             <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: C.fg, marginBottom: 7 }}>{label}</label>
             <input value={val} onChange={e => set(e.target.value)} placeholder={ph} type={type}
